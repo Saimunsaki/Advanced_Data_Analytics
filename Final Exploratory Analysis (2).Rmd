@@ -1,0 +1,155 @@
+---
+title: "Final Exploratory Analysis"
+author: "Kyle Froisland"
+date: "2024-12-03"
+output: html_document
+---
+
+***ECNS 560 Term Project: Bison Population Kyle Froisland and Saki***
+
+***Topic:*** American Buffalo (Bison) Population Levels from 2002 to
+2017
+
+***Motivation:*** Bison population reached near extinction (estimates
+generally say a few hundred bison) during the late 19th century, but had
+a miraculous comeback in the early to middle 20th century. However, the
+health and sustainability of bison populations is still an issue.
+Factors such as the opportunity cost of agricultural farming and cattle
+ranching loom and tend to crowd out bison domestication, and policies
+such as homesteading and urban expansion encroach on the grazing land of
+bison. Bison, being the national mammal of the U.S., play a culturally
+significant part in the history of the United States as well as the
+culture of native populations prior to the establishment of the United
+States. Thus, conservation efforts, regulations, or subsidies/incentives
+for private herds and domestication may be worth consideration by policy
+makers or conservation groups.
+
+***Data:*** 
+1. Bison population numbers by county from ArcGIS, Center of Excellence for Bison Studies, South Dakota State: Bison by the Numbers (arcgis.com) a. Years covered: 2002, 2007, 2012, 2017 b. Variables: State, County, Population (by year), Number of Operations (by year)
+
+2.  United States Geological Survey (USGS) Bison Range and Bison Habitat
+    Maps: American Bison (Bison bison) mBISOx_CONUS_2001v1 Range Map -
+    ScienceBase-Catalog and American Bison (Bison bison)
+    mBISOx_CONUS_2001v1 Habitat Map - ScienceBase-Catalog
+
+  a.  Provides spatial data on ranges and habitats
+
+3.  Hunting License Data By State:
+    <https://us-east-1.quicksight.aws.amazon.com/sn/accounts/329180516311/dashboards/48b2aa9c-43a9-4ea6-887e-5465bd70140b?directory_alias=tracs-quicksight>
+
+  a.  Years Covered: 1958 - 2024
+  b.  Variables: State, Year, Paid License Holders, Resident and
+    Non-Resident licenses, Cost of Hunting Licenses
+
+4.    GIS Canadian Boundary Spatial Data:
+    <https://simplemaps.com/gis/country/ca>
+
+5.    Census Data on Public and Private Land Percentages:
+    <https://www.summitpost.org/public-and-private-land-percentages-by-us-states/186111>
+
+***Data Processing:***
+  In order to analyze this data, we first created a tidy
+version of the Bison Population data. In order to do this we pivoted the
+data set from the columns containing population in each year and created
+a "year" column and a "population" column in their place. Once this was
+complete, we needed to string clean these columns as each observation
+included "bison_census" before the year instead of containing only the
+year. Then, we needed to create a new variable in order to get state-by
+state data as opposed to county-by-county. While we lost some details
+during this process, it allowed us to create a new dataset that would
+merge cleanly with our hunting data (as the hunting data contains only
+state level numbers).
+
+  Next, we cleaned the hunting data, making sure that we rename columns so
+that they will match with the population data and that we limited the
+years to only those years that also match the population data (ie, 2002,
+2007, 2012, and 2017). Additionally, some years were inputted as strings
+across the data sets while others were numeric, so we converted all
+years to numeric format in order to facilitate merging in the next step.
+
+  Finally, we merged the two data sets by their state and year variables
+in order to create a final dataframe for visualization and analysis. To
+do this we used a left join method that would join the hunting data to
+the original population data. The unit of analysis for this dataset is
+population and hunting data by state and by year, which we chose because
+we were constrained by the hunting data. Although we lost some details
+from the population data, state and year is an appropriate level of
+analysis because, as we see in the "ranges" shapefile, most Bison
+populations are concentrated in herds that graze in very concentrated
+and protected areas. Thus, additional details with regard to county
+level population would not change our results significantly and can be
+deduced from our range spatial data if necessary. Another interesting data point that we were able to derive was the percent decrease in Bison populations from the year 2002 to 2017, which was a simple calculation that we coded by creating a column containing the percent change of each observation's population level relative to 2002 and then removing observations from all years other than 2017.
+
+  As we got further into our project, we scraped a table containing Census data on the percentage of land in each state that is public and the percentage that is private. After cleaning some of the strings, such as removing the "%" from the end of each value in the public and private land columns, we ensured that all of the values were numeric in order to conduct future analysis on it. Finally, we merged this data with our previous dataset containing hunting and population data by our state acronym variable.
+  
+  In addition to these three data sets, we also incorporated three spatial datasets. The first includes bison habitats across the United States. Although this particular data did not provide much information to use in our analysis, it provided a basis for us to refine the subset of states that we would focus on. Most states in the United States have few to no Bison, and thus the visualization of their habitats helped us focus on the states that should be included in our analysis. Although the Bison population dataset indicates how many are in each state, we decided that states with low populations but large habitats would be worth including in order to capture potential fluctuations of bison herds moving between states, such as the movement of herds between Montana, Wyoming, and Idaho through Yellowstone National Park.
+  
+  In addition to Bison Habitats, we included the Census Cartographic Boundary Dataset for U.S. States. First, this data allowed us to create a visual of our states of interest by highlighted our selected states. Second, we used this data set in conjunction with our third spatial dataset, the Canadian Open Source Boundary data, to deduce data on how far north or south each state is. We conducted this analysis by plotting the centroid of each state, as shown here:
+![State Centroids](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/centroid check 2.png)  
+Upon plotting our centroids, we computed the distance from each centroid to the southern part of Canada (proxied by their southernmost province, Saskatchewan). We then merged this data with our base dataset in order to compile all of our useful information in one data frame.
+
+***Methods and Visualizations:***
+  In our initial exploration we started by plotting histograms of some individual variables of interest. First, we plotted the total Bison population levels of each of our major states of interest:
+![Total Bison Population Histogram](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/total bison pop hist.png)  
+  Next, we plotted a histogram of the percent decrease in Bison Population from the year 2002 to 2017:
+![% Decrease in Bison Population 2002 - 2017](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/perc diff hist.png)  
+
+Then, we plotted the number of hunting license holders in 2017:
+![Number of Hunting License Holders in 2017](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/hunting licenses hist.png)  
+
+Our final histogram was the percent of land that is public by state:
+![% of land that is public histogram](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/public land hist.png)
+
+  Upon exploring our initial histograms, there were no obvious or immediate trends that stood out to us. In order to further our analysis, our next visualization sought to explore the Bison population trends of some major states over time. The following displays trends among four major western United States states (Montana, Wyoming, North Dakota, and South Dakota):
+![Major State Populations Over Time](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/Major State Populations.png)
+
+What we see from the initial visualization is that there seems to be a general downward trend in Bison population from 2002 to 2017, but that there is no obvious trend between states in intermediate years. In other words, while all states ultimately have lower population numbers in 2017 than in 2002, there is fluctuation in between those years in which some states saw relatively steady decline (such as Montana), others saw sharp drops amidst periods of steady decline (such as North Dakota), and some even saw short periods of population growth (such as South Dakota and Wyoming).
+
+  After realizing that there is some variety in the details of population growth or decline across states, we sought to confirm our suspicion that the overall population trend is negative. What we see in the following graph is a confirmation of that suspicion, where population sees a strong downward trend across the Great Plains:
+![Great Plains Population Over Time - Overall Trend](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/bison pop over time by state and binned.png)
+In this plot, each point on this plot represents a state for a given year, and the color represents the population bin that the state falls into. What we saw in this data is that the number of high population states (blue dots) go away completely from the year 2002 to 2017, the number of medium population states (green dots) goes down substantially, and the number of low population states (orange dots) increases from 20020 to 2017. Thus, although the trend is not ubiquitous or uniform across all states, the aggregate trend shows Bison population decline.
+
+  As a side note, our decision to restrict our focus to the Great Plains was based off of our spatial data, as referenced before, which indicates to us that the majority of Bison herds are concentrated in these states, as shows in the following image:
+![Bison Herds in the U.S.](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/States of interest and ranges map.png)
+ 
+  Once we confirmed that population is indeed declining, we started exploring fluctuations in hunting license numbers as a possible correlate. The following graph shows the number of hunting licenses across the same years and the same states as our previous visual:
+![Great Plains Hunting License Numbers Over Time - Overall Trend](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/licenses over time 2.png)
+Note that we removed Texas from this graph. It was an extreme value which extended our y-axis greatly. We noted that Texas had some variation from 2010 to 2017 which is useful for us, however it was excluded from the graph in order to better demonstrate variation in other states and make the plots more interpretable. It was not excluded from our analysis, only this graph.
+
+  From this graph, we do not see any obvious trends in hunting licenses over time across most states in the Great Plains. The following graph confirms our suspicion that there is not an obvious correlation between hunting licenses and Bison population overall (The OLS lcoal regression fluctuates in both directions as the number of hunting licenses increases):
+![Hunting License Numbers vs Population Over Time](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/license vs population 2.png)
+
+  Although there is not an obvious and immediate relationship with our initial visualizations, it is still possible that we could find a relationship if we can find quick changes in the number of licenses in certain areas to exploit. Thus, in the following graph we explored the number of licenses in various states to see if any saw rapid increases or decreases in hunting licenses:
+![Hunting Licenses by State](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/Hunting Licenses by State.png)
+
+From this visualization, we see that most states do not have significant variation in their number of hunting licenses. However, Texas saw an upward trend in licenses from 2012 to 2017. The following plot explores the relationship between the increase in hunting licenses and population changes in Texas:
+![License vs Population in Texas](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/license vs pop texas.png)
+
+The data does not seem to indicate a linear relationship. This could be due to a variety of reasons, including the possibility that an increase in the number of hunting licenses does not necessarily mean that there is an increase in the amount of Bison hunting (as the licenses could be for any number of animals).
+
+  The other state that saw some variation in the number of hunting licenses issued is Oklahoma, as shown below:
+![License vs Population in Texas](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/Oklahoma Hunting vs Pop.png)
+Although we still lack sufficient evidence to infer causality between the two variables, Oklahoma demonstrates a negative relationship between hunting licenses and Bison population. In further analysis, potential exogeneous changes between states could be examined to try and control for noise in the data and inder causality.
+
+  Since we were not able to find strong relationships between Hunting Licenses and Bison population, we explored the latitude of each state as another variable of interest. Using our spatial data with State centroids and the Canadian border, we started by plotting the log of distance from Canada against the percent decrease in Bison population:
+![Public Land Share vs Bison Population Decline](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/lat and pop no trans.png)
+Our decision to plot the percent change in population instead of the total population level was based on the need to control for dramatic differences in total population level. Using percent change allowed us to focus on relative changes in population accounting for the states' actual Bison population capacity, as a small change in population in a state like North Dakota is not as significant as a small change in population in Nebraska. We did not logarithmically transform our distance variable because we did not want to mask the big difference in values between some observations and others, as it could lead to us falsely interpreting significance in our results. Additionally, the level value of distance seems to be much more indicative of the true data generating process, as distance from a point increases in a linear fashion.
+
+  Upon realizing that there was no obvious relationship between latitude and the percent decrease in Bison populations, we plotted an ordinary least squares (OLS) line of best fit in order to confirm this:
+![Public Land Share vs Bison Population Decline](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/lat and pop with reg no trans.png)
+This regression line confirmed our suspicion that there was no statistically significant relationship between the two variables.
+
+Our final variable of interest in this analysis is the share of land in each state that is public compares to the share of land that is private from the Census data. We started by plotting the percentage of land that is public in each state against the percent decrease in Bison population:
+![Public Land Share vs Bison Population Decline](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/land share and pop all states.png)
+Our initial plot of the data does not show any obvious relationship, but we noticed that two data points are extreme values at the top right-hand corner of the plot. These data points represent Idaho and Montana, who both have high proportions of public land but also saw relatively large percentage decreases in Bison population between 2002 and 2017. Removing these extreme values and plotting an OLS line of best fit, we get:
+![Public Land Share vs Bison Population Decline](C:/Users/kdfro/Documents/MSU/GitHub/ECNS-560-Term-Project-2/Visuals/land vs pop.png)
+We believe that it is justified to remove the Montana and Idaho values because it is likely that there are exogenous impacts which cause them to be part of a different data generating process than the other states. Over this time period, large numbers of Bison that grazed beyond the boundaries of Yellowstone National Park have been killed due to risk of Brucellosis transmission to the cattle farms and ranches that surround the park. Thus, the population decline rate in these states is not impacted in the same way by the share of public land that other states are. Running a simple linear regression on the relationship between these variables estimates that an increase of one percent of the land in a state that is publicly owned is associated with a 0.008 percent lower rate of decline in Bison population between 2002 and 2017. While this does not infer causality, it is a statistically significant relationship at the 99 percent level.
+
+***Conclusion:***
+  While we were not able to infer any causal relationships between variables in our data sets, we were able to find some relations of interest. The initial exploration of our data led us to believe that correlations would be stronger than we ultimately discovered, especially based off of our initial literature review and the causal mechanisms that we thought seemed plausible. However, a deeper investigation and visualization of the data helped us to realize which variables were more correlated than others.
+  We initially expected a negative relationship between hunting licenses and bison populations as a consequence of over hunting a common pool resource across all states. If states were to issue more licenses, we thought that this would ultimately mean that populations decrease as a consequence of more bison being killed by hunters. We believe that this relationship is not so obvious for two main reasons. First, the allocation of hunting licenses is heavily regulated at the state level in order to prevent a tragedy of the commons. Second, a state's capacity to maintain large Bison populations is dependent on the amount of land that the animals have to graze. Thus, an increase in the number of hunting licenses issued could in fact be an indicator of an increased amount of private hunting land. As the demand for Bison tags increases, it raises the opportunity cost of ranchers with land adjacent to bison ranges and incentives them to allow Bison to expand their territory and establish property rights. Thus, although more Bison are being hunted, there is more land available for additional growth.
+  We examined latitude as a potential correlate with Bison population decline due to our initial exploration of the data. It seemed as if more northern states saw larger rates of Bison population decline, but further analysis of the relationship demonstrated that we were influenced by the large rates of decline in Idaho and Montana, two very northern states, while the rest of the data did not follow the trend. It seemed like a plausible relationship due to factors such as differences in average temperature and rainfall, but there is insufficient evidence to draw a conclusion about this relationship. Likely, Bison are resilient enough animals that weather does not have a major impact between Great Plains states.
+  Finally, our exploration of the relationship between public land share and Bison population decline showed possibilities of a relationship. While we can not infer causality based on our simple regression model, we believe that we have taken a first step toward causal inference by making some plausible assumptions about Montana and Idaho being a part of a different data generating process and finding a reasonable correlation. It seems plausible that states with larger shares of public land would be have Bison populations that are more robust to market forces, and thus have relatively stable Bison populations as well. In order to find evidence of a causal connection resulting from this mechanism, we would need to control for a number of factors. First, the market price of Bison (both for meat and for pelts) could have a disparate impact on states. States with a greater percentage of private Bison ranches would be more inclined to sell off more of their Bison as prices rise, and lower prices could incentive transferring land from Bison grazing land to cattle grazing land. Additionally, variation in population could have an impact. Places like Bozeman, MT are seeing large increases in population and the consequent urbanization is crowding out grazing land. 
+
+***AI Disclosure:***
+  We used ChatGPT to help us perform string cleaning on the public and private land data from the Census. It provided us with the "row_to_names()" function from the "janitor" package, helping us to convert the first row to the column names efficiently. Additionally, it gave us the "sub()" function to help clean the strong values by removing the "%" from the end of all of the values of percentages of public and private land. Finally, we used the Google search engine AI platform the convert these columns to numeric.
